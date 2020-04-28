@@ -89,6 +89,15 @@ import './flightsurety.css';
             });
         })
 
+        DOM.elid('submit-contract').addEventListener('click', () => {
+            //let passenger = DOM.elid('addressPassenger').value;
+            let app_contract = DOM.elid('app-contract').value;
+            // Write transaction
+            contract.authorizeCaller(app_contract, (error, result) => {
+                console.log("result: ", error, result);
+            });
+        })
+
         /*DOM.elid('submit-withdraw').addEventListener('click', () => {
 
         })

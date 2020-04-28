@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>FlightSurety</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+
+    <style>
+        * {box-sizing: border-box}
+
+        /* Set height of body and the document to 100% */
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: Arial;
+        }
+
+        /* Style tab links */
+        .tablink {
+            background-color: #555;
+            color: white;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            font-size: 17px;
+            width: 25%;
+        }
+
+        .tablink:hover {
+            background-color: #777;
+        }
+
+        /* Style the tab content (and add height:100% for full page content) */
+        .tabcontent {
+            color: white;
+            display: none;
+            padding: 100px 20px;
+            height: 100%;
+        }
+
+        #Flights {background-color: #2f2f38;}
+        #Airlines {background-color: #2f2f38;}
+        #Passengers {background-color: #2f2f38;}
+        #Operational {background-color: #2f2f38;}
+    </style>
+
+</head>
+
+<body>
+
+
+<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+    <a class="navbar-brand" href="#">FlightSurety</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault"
+            aria-controls="navbarsExampleDefault"
+            aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+</nav>
+
+<main class="container">
+
+    <button class="tablink" onclick="openPage('Flights', this, '#16af91')">Flights</button>
+    <button class="tablink" onclick="openPage('Airlines', this, '#16af91')" id="defaultOpen">Airlines</button>
+    <button class="tablink" onclick="openPage('Passengers', this, '#16af91')">Passengers</button>
+    <button class="tablink" onclick="openPage('Operational', this, '#16af91')">Operational</button>
+
+    <div id="Flights" class="tabcontent">
+        <h2>Flights</h2>
+        <p>In the Blue, Painted Blue!</p>
+        <form>
+            <div class="form-group">
+                <label for="flightOwner">Airlines Address:</label>
+                <input type="text" class="form-control" id="flightOwner" placeholder="Enter Airlines address" name="address">
+            </div>
+
+            <div class="form-group">
+                <label for="flightNumber">Flight Number:</label>
+                <input type="text" class="form-control" id="flightNumber" placeholder="Enter the Flight Number" name="flightNumber">
+            </div>
+
+            <div class="form-group">
+                <label for="departureDate">Departure Date:</label>
+                <input type="datetime-local" class="form-control" id="departureDate" placeholder="04/27/2020 09:30AM">
+            </div>
+
+            <btn id="submit-Flight" class="btn btn-primary">Submit</btn>
+            <btn id="submit-fetchFlight" class="btn btn-primary" data-id="2">Fetch</btn>
+
+            <h2 class="top-40">Console</h2>
+            <div id="flights-console" class="top-10" style="background: #000000">
+            </div>
+
+        </form>
+    </div>
+
+    <div id="Airlines" class="tabcontent">
+        <h2>Airlines</h2>
+        <p>One day I'll fly away!</p>
+        <form>
+            <div class="form-group">
+                <label for="addressAirline">Address:</label>
+                <input type="text" class="form-control" id="addressAirline" placeholder="Enter Airline address" name="address">
+            </div>
+
+            <div class="form-group">
+                <label for="fund">Payment (for donation or activation):</label>
+                <input type="number" class="form-control" id="fund" placeholder="0">
+            </div>
+
+            <btn id="submit-Airline" class="btn btn-primary">Submit</btn>
+            <btn id="submit-activate" class="btn btn-primary">Activate (10 ETH)</btn>
+            <btn id="submit-donate" class="btn btn-primary">Donate</btn>
+
+            <h2 class="top-40">Console</h2>
+            <div id="airlines-console" class="top-10" style="background: #000000">
+            </div>
+
+        </form>
+    </div>
+
+    <div id="Passengers" class="tabcontent">
+        <h2>Passengers</h2>
+        <p>Only hate the road when you're missing home!</p>
+        <form>
+            <div class="form-group">
+                <label for="addressPassenger">Address:</label>
+                <input type="text" class="form-control" id="addressPassenger" placeholder="Enter Wallet address" name="address">
+            </div>
+
+            <div class="form-group">
+                <label for="flightPassenger">Flight:</label>
+                <input type="text" class="form-control" id="flightPassenger" placeholder="Enter the Flight Number">
+            </div>
+            <div class="form-group">
+                <label for="airlinePassenger">Airline address:</label>
+                <input type="text" class="form-control" id="airlinePassenger" placeholder="Enter Airline address">
+            </div>
+            <div class="form-group">
+                <label for="payment">Payment:</label>
+                <input type="number" class="form-control" id="payment" placeholder="Up to 1 Ether">
+            </div>
+
+            <btn id="submit-buy" class="btn btn-primary">Buy Insurance</btn>
+            <btn id="submit-withdraw" class="btn btn-primary">Withdraw</btn>
+            <btn id="submit-balance" class="btn btn-primary">Balance</btn>
+
+            <h2 class="top-40">Console</h2>
+            <div id="passengers-console" class="top-10" style="background: #000000">
+            </div>
+
+        </form>
+    </div>
+
+    <div id="Operational" class="tabcontent">
+
+        <div id="display-wrapper" class="top-10" >
+        </div>
+
+        <div class="form-group">
+            <label for="flight-number">Flight:</label>
+            <input type="number" class="form-control" id="flight-number" placeholder="Enter the Flight Number">
+        </div>
+
+        <btn class="btn btn-primary" id="submit-oracle">Submit to Oracles</btn>
+    </div>
+
+    <script>
+        function openPage(pageName,elmnt,color) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tablink");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].style.backgroundColor = "";
+            }
+            document.getElementById(pageName).style.display = "block";
+            elmnt.style.backgroundColor = color;
+        }
+
+        // Get the element with id="defaultOpen" and click on it
+        document.getElementById("defaultOpen").click();
+    </script>
+
+</main>
+
+</body>
+
+</html>

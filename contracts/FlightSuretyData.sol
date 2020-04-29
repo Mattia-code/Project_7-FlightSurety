@@ -30,7 +30,7 @@ contract FlightSuretyData is Airline {
     }
 
     mapping(address => Passenger) private passengers;
-    mapping(bytes32 => Flight) private flights;
+    mapping(bytes32 => Flight) public flights;
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
     /********************************************************************************************/

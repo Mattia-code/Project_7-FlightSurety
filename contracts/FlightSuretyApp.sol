@@ -411,14 +411,14 @@ contract FlightSuretyApp {
     function getFlightKey
                         (
                             address airline,
-                            string flight,
-                            uint256 timestamp
+                            string flight
+                            //uint256 timestamp
                         )
                         pure
-                        internal
+                        external
                         returns(bytes32) 
     {
-        return keccak256(abi.encodePacked(airline, flight, timestamp));
+        return keccak256(abi.encodePacked(airline, flight));
     }
 
     // Returns array of three non-duplicating integers from 0-9

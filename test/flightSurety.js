@@ -4,6 +4,8 @@ var BigNumber = require('bignumber.js');
 contract('Flight Surety Tests', async (accounts) => {
 
     var config;
+    const timestamp = Math.floor(Date.now() / 1000) + 1000;
+
     before('setup contract', async () => {
         config = await Test.Config(accounts);
         await config.flightSuretyData.authorizeCaller(config.flightSuretyApp.address);
@@ -64,6 +66,7 @@ contract('Flight Surety Tests', async (accounts) => {
 
     });
 
+
     it('(airline) cannot register an Airline using registerAirline() if it is not funded', async () => {
 
         // ARRANGE
@@ -82,23 +85,24 @@ contract('Flight Surety Tests', async (accounts) => {
 
     });
 
-    it("First airline is registered when contract is deployed.", async () => {
+    it("(airlines) First airline is registered when contract is deployed:", async () => {
         let result = await config.flightSuretyData.isAirline.call(config.firstAirline);
         assert.equal(result, true, "First airline should be registered when contract is deployed.");
     });
 
-    it("Airline can be registered, but does not participate in contract until it submits funding of 10 ether. (1)", async () => {
+    it("(airlines) Airline can be registered, but does not participate in contract until it submits funding of 10 ether (1):", async () => {
         let balance = web3.utils.toWei("10", "ether");
 
         let result = await config.flightSuretyData.isActive.call(config.firstAirline);
         assert.equal(result, false, "No submits funding of 10 ether.");
 
-        await config.flightSuretyApp.activateAirline(true, {from: config.firstAirline, value: balance, gasPrice:0});
+        await config.flightSuretyApp.activateAirline(true, {from: config.firstAirline, value: balance, gasPrice: 0});
         result = await config.flightSuretyData.isActive.call(config.firstAirline);
         assert.equal(result, true, "No submits funding of 10 ether.");
     });
 
-    it("Only existing airline may register a new airline until there are at least four airlines registered.", async () => {
+    //(?)
+    it("(airlines) Only existing airline may register a new airline until there are at least four airlines registered:", async () => {
 
         let newAirline1 = accounts[2];
         let newAirline2 = accounts[3];
@@ -107,29 +111,39 @@ contract('Flight Surety Tests', async (accounts) => {
 
         let balance = web3.utils.toWei("1", "ether");
 
-        await config.flightSuretyApp.registerAirline(newAirline1, {from: config.firstAirline, value: balance, gasPrice:0});
+        await config.flightSuretyApp.registerAirline(newAirline1, {
+            from: config.firstAirline,
+            value: balance,
+            gasPrice: 0
+        });
         let result = await config.flightSuretyData.isAirline.call(newAirline1);
         assert.equal(result, true, "existing airline may register a new airline until there are at least four airlines registered.");
 
-        await config.flightSuretyApp.registerAirline(newAirline2, {from: config.firstAirline, value: balance, gasPrice:0});
+        await config.flightSuretyApp.registerAirline(newAirline2, {
+            from: config.firstAirline,
+            value: balance,
+            gasPrice: 0
+        });
         result = await config.flightSuretyData.isAirline.call(newAirline2);
         assert.equal(result, true, "existing airline may register a new airline until there are at least four airlines registered.");
 
         try {
-            await config.flightSuretyApp.registerAirline(newAirline3, {from: newAirline2, value: balance, gasPrice:0});
-        }catch (e) { }
+            await config.flightSuretyApp.registerAirline(newAirline3, {from: newAirline2, value: balance, gasPrice: 0});
+        } catch (e) {
+        }
         result = await config.flightSuretyData.isAirline.call(newAirline3);
         assert.equal(result, false, "existing airline may register a new airline until there are at least four airlines registered.");
 
         try {
-            await config.flightSuretyApp.registerAirline(newAirline4, {from: newAirline3, value: balance, gasPrice:0});
-        }catch (e) { }
+            await config.flightSuretyApp.registerAirline(newAirline4, {from: newAirline3, value: balance, gasPrice: 0});
+        } catch (e) {
+        }
         result = await config.flightSuretyData.isAirline.call(newAirline4);
         assert.equal(result, false, "existing airline may register a new airline until there are at least four airlines registered.");
 
     });
 
-    it("Registration of fifth and subsequent airlines requires multi-party consensus of 50% of registered airlines.", async () => {
+    it("(airlines) Registration of fifth and subsequent airlines requires multi-party consensus of 50% of registered airlines.", async () => {
         let newAirline1 = accounts[2];
         let newAirline2 = accounts[3];
         let newAirline3 = accounts[4];
@@ -138,46 +152,49 @@ contract('Flight Surety Tests', async (accounts) => {
         let balance1 = web3.utils.toWei("1", "ether");
         let balance10 = web3.utils.toWei("10", "ether");
 
-        await config.flightSuretyApp.activateAirline(true, {from: newAirline1, value: balance10, gasPrice:0});
-        await config.flightSuretyApp.activateAirline(true, {from: newAirline2, value: balance10, gasPrice:0});
+        await config.flightSuretyApp.activateAirline(true, {from: newAirline1, value: balance10, gasPrice: 0});
+        await config.flightSuretyApp.activateAirline(true, {from: newAirline2, value: balance10, gasPrice: 0});
 
-        await config.flightSuretyApp.registerAirline(newAirline3, {from: newAirline2, value: balance1, gasPrice:0});
+        await config.flightSuretyApp.registerAirline(newAirline3, {from: newAirline2, value: balance1, gasPrice: 0});
         let result = await config.flightSuretyData.isAirline.call(newAirline3);
         assert.equal(result, true, "existing airline may register a new airline until there are at least four airlines registered.");
 
-        await config.flightSuretyApp.activateAirline(true, {from: newAirline3, value: balance10, gasPrice:0});
+        await config.flightSuretyApp.activateAirline(true, {from: newAirline3, value: balance10, gasPrice: 0});
 
-        await config.flightSuretyApp.registerAirline(newAirline4, {from: config.firstAirline, value: balance1, gasPrice:0});
+        await config.flightSuretyApp.registerAirline(newAirline4, {
+            from: config.firstAirline,
+            value: balance1,
+            gasPrice: 0
+        });
         result = await config.flightSuretyData.isAirline.call(newAirline4);
         assert.equal(result, false, "existing airline may register a new airline until there are at least four airlines registered.");
 
-        await config.flightSuretyApp.registerAirline(newAirline4, {from: newAirline1, value: balance1, gasPrice:0});
+        await config.flightSuretyApp.registerAirline(newAirline4, {from: newAirline1, value: balance1, gasPrice: 0});
         result = await config.flightSuretyData.isAirline.call(newAirline4);
         assert.equal(result, true, "existing airline may register a new airline until there are at least four airlines registered.");
 
     });
 
-    it("Airline can be registered, but does not participate in contract until it submits funding of 10 ether. (2)", async () => {
+    it("(airlines) Airline can be registered, but does not participate in contract until it submits funding of 10 ether. (2)", async () => {
         let newAirline4 = accounts[5];
         let balance = web3.utils.toWei("10", "ether");
 
         let result = await config.flightSuretyData.isActive.call(newAirline4);
         assert.equal(result, false, "No submits funding of 10 ether.");
 
-        await config.flightSuretyApp.activateAirline(true, {from: newAirline4, value: balance, gasPrice:0});
+        await config.flightSuretyApp.activateAirline(true, {from: newAirline4, value: balance, gasPrice: 0});
         result = await config.flightSuretyData.isActive.call(newAirline4);
         assert.equal(result, true, "No submits funding of 10 ether.");
     });
 
-    it("Airlines can register a fligth.", async () => {
+    it("(airlines) Airlines can register a fligth.", async () => {
         let flight = 'ND1309';
-        let timestamp = 1587924461;
+        //let timestamp = 1587924461;
         let statusCode = 0;
         let isRegistered = true;
 
         let result = await config.flightSuretyApp.registerFlight(config.firstAirline, flight, timestamp, {from: config.firstAirline});
 
-        //console.log(result);
         assert.equal(result.logs[0].event, "RegisterFlight"); //asserts that the event has been emitted
 
         const resultBuffer = await config.flightSuretyApp.fetchFlightBuffer.call(config.firstAirline, flight);
@@ -189,12 +206,17 @@ contract('Flight Surety Tests', async (accounts) => {
         assert.equal(resultBuffer[3], config.firstAirline, 'Error: Missing or Invalid airline address');
     });
 
-    it("Passengers may pay up to 1 ether for purchasing flight insurance.", async () => {
+
+    it("(passengers) Passengers may pay up to 1 ether for purchasing flight insurance:", async () => {
         let flight = 'ND1309';
         let passeger = accounts[6];
         let insuranceValue = web3.utils.toWei("0.5", "ether");
 
-        await config.flightSuretyApp.buy(config.firstAirline, flight, {from: passeger, value: insuranceValue, gasPrice:0});
+        await config.flightSuretyApp.buy(config.firstAirline, flight, {
+            from: passeger,
+            value: insuranceValue,
+            gasPrice: 0
+        });
         const resultBuffer = await config.flightSuretyData.fetchFlightInsured.call(passeger, config.firstAirline, flight);
 
         // Verify the result set
@@ -203,43 +225,111 @@ contract('Flight Surety Tests', async (accounts) => {
         assert.equal(resultBuffer[2], 0, 'Error: Missing or Invalid airline address');
     });
 
-    it("Initial funding for the insurance. Unless there are too many delayed flights resulting in " +
+    it('(oracles) Oracles can register', async () => {
+        let n = 20;
+        let fee = await config.flightSuretyApp.REGISTRATION_FEE.call();
+
+        try {
+            // ACT
+            for (let a = 1; a < n; a++) {
+                await config.flightSuretyApp.registerOracle({from: accounts[a], value: fee});
+                await config.flightSuretyApp.getMyIndexes.call({from: accounts[a]});
+                //console.log(`Oracle Registered: ${result[0]}, ${result[1]}, ${result[2]}`);
+            }
+        } catch (e) {
+            console.log(e.toString())
+        }
+
+    });
+
+    it('(oracles) Can request flight status, process it and credit insuree', async () => {
+        let flight = 'ND1309';
+        let n = 20;
+        let secondAirline = accounts[2];
+        let passenger = accounts[6];
+        let tx;
+        // Submit a request for oracles to get status information for a flight
+        await config.flightSuretyApp.fetchFlightStatus(config.firstAirline, flight, timestamp);
+
+        /* Since the Index assigned to each test account is opaque by design, loop through all the accounts and for each account, all its Indexes (indices?) and submit a response. The contract will reject a submission if it was not requested so while sub-optimal, it's a good test of that feature
+        */
+        for (let a = 1; a < n; a++) {
+
+            let oracleIndexes = await config.flightSuretyApp.getMyIndexes.call({from: accounts[a]});
+            for (let idx = 0; idx < 3; idx++) {
+
+                try {
+                    // Submit a response...it will only be accepted if there is an Index match
+                    await config.flightSuretyApp.submitOracleResponse(oracleIndexes[idx], config.firstAirline, flight, timestamp, 20, {from: accounts[a]});
+                } catch (e) {
+                    // Enable this when debugging
+                    //console.log('Error', idx, oracleIndexes[idx].toNumber(), flight, timestamp);
+                }
+
+            }
+        }
+
+    });
+
+
+    it('(oracles) Update Flight StatusCode after adequate answers have been received', async () => {
+        let flight = 'ND1309';
+        const key = await config.flightSuretyApp.getFlightKey(config.firstAirline, flight);
+        const flightStruct = await config.flightSuretyData.flights.call(key);
+        assert.equal(
+            flightStruct.statusCode, 20,
+            'Flight status was not updated correctly'
+        );
+    });
+
+    it('(passenger) Can withdraw credited insurance amount', async () => {
+        let flight = 'ND1309';// Course number
+        let balanceBeforeContract = await web3.eth.getBalance(config.flightSuretyApp.address);
+
+        let passenger = accounts[6];
+
+        const balance = await config.flightSuretyApp.getBalance(passenger);
+        const balanceBefore = await web3.eth.getBalance(passenger)
+
+        console.log("balanceBefore", balanceBefore);
+
+        /*try {
+            await config.flightSuretyApp.withdrawFunds(secondAirline, flight, timestamp, {from: passenger});
+        } catch (error) {
+            console.log(error.message)
+        }
+
+        const balanceAfter = await web3.eth.getBalance(passenger);
+
+        let difference = balanceAfter - balanceBefore;
+        let balanceAfterContract = await web3.eth.getBalance(config.flightSuretyApp.address);
+
+        console.log(difference)
+        assert(difference, 0, "Payout amount is not correct");*/
+    });
+
+    it("(All) Initial funding for the insurance. Unless there are too many delayed flights resulting in " +
         "insurance payouts, the contract should be self-sustaining", async () => {
 
         let value = web3.utils.toWei("10", "ether");
+        const balanceBeforeContract = await web3.eth.getBalance(config.flightSuretyApp.address);
+        const balanceBefore = await web3.eth.getBalance(config.owner);
 
-        let result = await config.flightSuretyApp.fundContract({from: config.owner, value: value, gasPrice:0});
+        let result = await config.flightSuretyApp.fundContract({from: config.owner, value: value, gasPrice: 0});
+
+        let balanceAfterContract = await web3.eth.getBalance(config.flightSuretyApp.address);
+        let balanceAfter = await web3.eth.getBalance(config.owner);
 
         assert.equal(result.logs[0].event, "Fund"); //asserts that the event has been emitted
+        assert.equal(balanceAfterContract - balanceBeforeContract, Number(value),);
+        assert.equal(balanceBefore - balanceAfter, Number(value),);
     });
 
-    it("For debug", async () => {
+    it("(debug):", async () => {
 
         const resultBuffer = await config.flightSuretyApp.fetchAirlineStatus.call(config.firstAirline);
         console.log("resultBuffer", resultBuffer);
         assert.equal(resultBuffer, true, 'Error: Invalid value isRegistered');
     });
-
-
-    /*it("If flight is delayed due to airline fault, passenger receives credit of 1.5X the amount they paid.", async () => {
-        /!*let flight = 'ND1309';
-        let passeger = accounts[5];
-        let balance = web3.utils.toWei("0.5", "ether");
-
-        let result = await config.flightSuretyApp.fetchFlightStatus();
-
-        assert.equal(result.logs[0].event, "RegisterFlight")*!/
-
-    });
-
-    it("Passenger can withdraw any funds owed to them as a result of receiving credit for insurance payout.", async () => {
-
-
-    });
-
-    it("Insurance payouts are not sent directly to passenger’s wallet.", async () => {
-
-
-    });*/
 
 });

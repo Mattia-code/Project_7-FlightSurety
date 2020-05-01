@@ -207,6 +207,7 @@ contract FlightSuretyApp {
         flightSuretyData.processFlightStatus(airline, flight, timestamp, statusCode);
     }
 
+    event InsuranceBought(bool result);
     //
     function buy
     (
@@ -220,6 +221,7 @@ contract FlightSuretyApp {
     {
         require(msg.value>0, "Error");
         flightSuretyData.buy(msg.sender, msg.value, airline, flight);
+        emit InsuranceBought(true);
     }
 
     /**
@@ -271,6 +273,17 @@ contract FlightSuretyApp {
     )
     {
         return flightSuretyData.fetchAirlineStatus(airline);
+    }
+
+    //
+    function getBalance() external returns(uint) {
+        return flightSuretyData.getBalance(msg.sender);
+    }
+
+    function withdrawFunds() public returns(uint){
+        uint balance = flightSuretyData.withdrawFunds(msg.sender);
+        msg.sender.transfer(balance);
+        return balance;
     }
 
 

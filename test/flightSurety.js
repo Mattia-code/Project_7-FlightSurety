@@ -220,6 +220,8 @@ contract('Flight Surety Tests', async (accounts) => {
         const resultBuffer = await config.flightSuretyData.fetchFlightInsured.call(passeger, config.firstAirline, flight);
 
         // Verify the result set
+        /*console.log("resultBuffer[1]", resultBuffer[1], "insuranceValue", insuranceValue);
+        console.log("resultBuffer[2]", resultBuffer[2]);*/
         assert.equal(resultBuffer[0], true, 'Error: Invalid value isRegistered');
         assert.equal(resultBuffer[1], insuranceValue, 'Error: Missing or Invalid timestamp');
         assert.equal(resultBuffer[2], 0, 'Error: Missing or Invalid airline address');
@@ -283,29 +285,24 @@ contract('Flight Surety Tests', async (accounts) => {
     });
 
     it('(passenger) Can withdraw credited insurance amount', async () => {
-        let flight = 'ND1309';// Course number
-        let balanceBeforeContract = await web3.eth.getBalance(config.flightSuretyApp.address);
-
         let passenger = accounts[6];
 
-        const balance = await config.flightSuretyApp.getBalance(passenger);
-        const balanceBefore = await web3.eth.getBalance(passenger)
+        const balance = await web3.eth.getBalance(passenger);
+        const balancePassegerBefore = await config.flightSuretyApp.getBalance.call({from: passenger});
+        assert.equal(balancePassegerBefore, web3.utils.toWei("0.75", "ether"), "ERROR!");
 
-        console.log("balanceBefore", balanceBefore);
-
-        /*try {
-            await config.flightSuretyApp.withdrawFunds(secondAirline, flight, timestamp, {from: passenger});
+        try {
+            await config.flightSuretyApp.withdrawFunds({from: passenger});
         } catch (error) {
-            console.log(error.message)
+            console.log(error)
         }
 
         const balanceAfter = await web3.eth.getBalance(passenger);
+        const balancePassegerAfter = await config.flightSuretyApp.getBalance.call({from: passenger, gasPrice: 0});
+        let difference = Number(balanceAfter) - Number(balance);
 
-        let difference = balanceAfter - balanceBefore;
-        let balanceAfterContract = await web3.eth.getBalance(config.flightSuretyApp.address);
-
-        console.log(difference)
-        assert(difference, 0, "Payout amount is not correct");*/
+        //assert.equal(difference, Number(balancePassegerBefore), "ERROR 2!");
+        assert.equal(Number(balancePassegerAfter), 0, "ERROR 1!");
     });
 
     it("(All) Initial funding for the insurance. Unless there are too many delayed flights resulting in " +
@@ -321,14 +318,16 @@ contract('Flight Surety Tests', async (accounts) => {
         let balanceAfter = await web3.eth.getBalance(config.owner);
 
         assert.equal(result.logs[0].event, "Fund"); //asserts that the event has been emitted
-        assert.equal(balanceAfterContract - balanceBeforeContract, Number(value),);
-        assert.equal(balanceBefore - balanceAfter, Number(value),);
+        assert.equal(balanceAfterContract - balanceBeforeContract, Number(value), "ERROR");
+        assert.equal(balanceBefore - balanceAfter, Number(value), "ERROR");
     });
 
     it("(debug):", async () => {
 
         const resultBuffer = await config.flightSuretyApp.fetchAirlineStatus.call(config.firstAirline);
+        /*
         console.log("resultBuffer", resultBuffer);
+        */
         assert.equal(resultBuffer, true, 'Error: Invalid value isRegistered');
     });
 

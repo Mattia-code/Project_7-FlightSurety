@@ -37,7 +37,7 @@ web3.eth.getAccounts().then((accounts) => {
         for(let a=1; a<ORACLES_COUNT; a++) {
             flightSuretyApp.methods.registerOracle()
                 .send({ from: accounts[a], value: fee,gas:4000000 })
-                .then(result=>{
+                .then(result =>{
                     flightSuretyApp.methods.getMyIndexes().call({from: accounts[a]})
                         .then(indices =>{
                             oracles[accounts[a]] = indices;
@@ -97,7 +97,6 @@ flightSuretyApp.events.OracleRequest({
 
             }
         }
-        //console.log(event);
 
     }
 

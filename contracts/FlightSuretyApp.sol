@@ -47,7 +47,7 @@ contract FlightSuretyApp {
 
     // Define a modifier that checks the price and refunds the remaining balance
     modifier paidEnough(uint _price) {
-        require(msg.value >= _price);
+        require(msg.value >= _price, "Not enough funds");
         _;
     }
 
@@ -157,7 +157,7 @@ contract FlightSuretyApp {
                             requireIsOperational
                             returns(bool success, uint256 votes)
     {
-        require(msg.value >= AIRLINE_REGISTRATION_FEE, "Error 1");
+        require(msg.value >= AIRLINE_REGISTRATION_FEE, "Not enough funds");
         return flightSuretyData.registerAirline(newAirline, msg.sender);
     }
 
@@ -222,7 +222,6 @@ contract FlightSuretyApp {
     requireIsOperational
     checkValueLimit(INSURANCE_CAP)
     {
-        require(msg.value>0, "Error");
         flightSuretyData.buy(msg.sender, msg.value, airline, flight);
         emit InsuranceBought(true);
     }

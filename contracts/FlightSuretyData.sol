@@ -138,8 +138,8 @@ contract FlightSuretyData is Airline {
     requireIsCallerAuthorized
     returns (bool success, uint256 votes)
     {
-        require(isAirline(oldAirlines), "Error 2 - Caller is not an Airline");
-        require(isActive(oldAirlines), "Error 2 - Caller is not an active Airline");
+        require(isAirline(oldAirlines), "Caller is not an Airline");
+        require(isActive(oldAirlines), "Caller is not an active Airline");
         if (activeCount < 4) {
             addAirline(newAirlines, oldAirlines);
             return (true, 0);
@@ -171,7 +171,7 @@ contract FlightSuretyData is Airline {
     requireIsOperational
     requireIsCallerAuthorized
     returns (bool success){
-        require(isAirline(account), "Error 3");
+        require(isAirline(account), "Caller is not an Airline");
         setAirlaneStatus(account, mode);
         return (true);
     }
@@ -186,8 +186,8 @@ contract FlightSuretyData is Airline {
     requireIsOperational
     requireIsCallerAuthorized
     {
-        require(isAirline(_airline), "Error");
-        require(isActive(_airline), "Error");
+        require(isAirline(_airline), "Caller is not an Airline");
+        require(isActive(_airline), "Caller is not an active Airline");
         bytes32 _key = getFlightKey(_airline, _flight);
         flights[_key] = Flight(
             {
@@ -237,7 +237,7 @@ contract FlightSuretyData is Airline {
         bool isRegistered
     )
     {
-        require(isAirline(airline), "Error");
+        require(isAirline(airline), "Caller is not an Airline");
         isRegistered = isActive(airline);
 
         return (
@@ -314,7 +314,7 @@ contract FlightSuretyData is Airline {
     //payable
     {
         bytes32 _key = getFlightKey(airline, flight);
-        require(flights[_key].isRegistered, "Ops!");
+        require(flights[_key].isRegistered, "The flight doesn't exist");
         //1st nd
         //passengers[account].wallet = account;
         passengers[account].insuranceValue[_key] = value;

@@ -40,13 +40,14 @@ contract FlightSuretyApp {
 
     event RegisterFlight(bytes32 code);
     event Fund(uint value);
+    event InsuranceBought(bool result);
 
     // Modifiers help avoid duplication of code. They are typically used to validate something
     // before a function is allowed to be executed.
 
     // Define a modifier that checks the price and refunds the remaining balance
     modifier paidEnough(uint _price) {
-        require(msg.value >= _price);
+        require(msg.value >= _price, "Not enough funds");
         _;
     }
 
@@ -156,7 +157,7 @@ contract FlightSuretyApp {
                             requireIsOperational
                             returns(bool success, uint256 votes)
     {
-        require(msg.value >= AIRLINE_REGISTRATION_FEE, "Error 1");
+        require(msg.value >= AIRLINE_REGISTRATION_FEE, "Not enough funds");
         return flightSuretyData.registerAirline(newAirline, msg.sender);
     }
 
@@ -186,6 +187,9 @@ contract FlightSuretyApp {
                                 external
     requireIsOperational
     {
+        /*
+            Only Airline (registerFlight) & Only Active Airline
+        */
         flightSuretyData.registerFlight(_airline, _flight, _timestamp);
         emit RegisterFlight(keccak256(abi.encodePacked(_airline, _flight, _timestamp)));
     }
@@ -207,7 +211,6 @@ contract FlightSuretyApp {
         flightSuretyData.processFlightStatus(airline, flight, timestamp, statusCode);
     }
 
-    event InsuranceBought(bool result);
     //
     function buy
     (
@@ -219,20 +222,8 @@ contract FlightSuretyApp {
     requireIsOperational
     checkValueLimit(INSURANCE_CAP)
     {
-        require(msg.value>0, "Error");
         flightSuretyData.buy(msg.sender, msg.value, airline, flight);
         emit InsuranceBought(true);
-    }
-
-    /**
-     *  @dev Credits payouts to insurees
-    */
-    function creditInsurees
-    (
-    )
-    external
-    {
-        flightSuretyData.creditInsurees();
     }
 
     /**
@@ -240,8 +231,7 @@ contract FlightSuretyApp {
      *      resulting in insurance payouts, the contract should be self-sustaining
      *
      */
-    function fundContract
-    ()
+    function fundContract()
     public
     payable
     requireIsOperational
@@ -276,11 +266,11 @@ contract FlightSuretyApp {
     }
 
     //
-    function getBalance() external returns(uint) {
+    function getBalance() external requireIsOperational returns(uint) {
         return flightSuretyData.getBalance(msg.sender);
     }
 
-    function withdrawFunds() public returns(uint){
+    function withdrawFunds() public requireIsOperational returns(uint){
         uint balance = flightSuretyData.withdrawFunds(msg.sender);
         msg.sender.transfer(balance);
         return balance;
@@ -295,6 +285,7 @@ contract FlightSuretyApp {
                             uint256 timestamp                            
                         )
                         external
+                        requireIsOperational
     {
         uint8 index = getRandomIndex(msg.sender);
 

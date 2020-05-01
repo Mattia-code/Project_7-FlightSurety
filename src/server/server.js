@@ -25,7 +25,7 @@ let flightSuretyData = new web3.eth.Contract(FlightSuretyData.abi, config.dataAd
 
 web3.eth.getAccounts().then((accounts) => {
     console.log("length :"+ accounts.length);
-    flightSuretyData.methods.authorizeCallerContract(config.appAddress)
+    flightSuretyData.methods.authorizeCaller(config.appAddress)
         .send({from: accounts[0]})
         .then(result => {
             console.log("appAddress registered as the authorized contract of dataContract");
@@ -66,9 +66,6 @@ flightSuretyApp.events.FlightStatusInfo({
     }
 );
 
-
-
-
 flightSuretyApp.events.OracleRequest({
     fromBlock: 0
 }, function (error, event) {
@@ -101,6 +98,7 @@ flightSuretyApp.events.OracleRequest({
     }
 
 });
+
 const app = express();
 app.get('/api', (req, res) => {
     res.send({

@@ -273,6 +273,17 @@ contract FlightSuretyApp {
         return flightSuretyData.fetchAirlineStatus(airline);
     }
 
+    //
+    function getBalance() external returns(uint) {
+        return flightSuretyData.getBalance(msg.sender);
+    }
+
+    function withdrawFunds() public returns(uint){
+        uint balance = flightSuretyData.withdrawFunds(msg.sender);
+        msg.sender.transfer(balance);
+        return balance;
+    }
+
 
     // Generate a request for oracles to fetch flight information
     function fetchFlightStatus

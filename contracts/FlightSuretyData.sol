@@ -207,6 +207,10 @@ contract FlightSuretyData is Airline {
         flights[_key].statusCode = statusCode;
         flights[_key].updatedTimestamp = timestamp;
         flights[_key].airline = airline;
+        address[] insured = flights[_key].insured;
+        for (uint i=0; i<insured.length; i++) {
+            passengers[insured[i]].balance = passengers[insured[i]].insuranceValue[_key].mul(3).div(2);
+        }
     }
 
     //
@@ -382,7 +386,19 @@ contract FlightSuretyData is Airline {
         contractApp = appAddress;
     }
 
+    function getBalance(
+        address passenger
+    ) external returns(uint){
+        return passengers[passenger].balance;
+    }
 
+    function withdrawFunds(
+        address passenger
+    ) external returns (uint){
+        uint balance = passengers[passenger].balance;
+        passengers[passenger].balance = 0;
+        return balance;
+    }
 
 }
 

@@ -24,7 +24,6 @@ contract FlightSuretyData is Airline {
 
     struct Passenger {
         bool isRegistered;
-        //address wallet;
         mapping (bytes32 => uint) insuranceValue;
         uint balance;
     }
@@ -79,6 +78,12 @@ contract FlightSuretyData is Airline {
         _;
     }
 
+    modifier requireIsCallerAuthorized()
+    {
+        require(msg.sender == contractApp, "Caller is not authorized");
+        _;
+    }
+
     /********************************************************************************************/
     /*                                       UTILITY FUNCTIONS                                  */
     /********************************************************************************************/
@@ -129,6 +134,7 @@ contract FlightSuretyData is Airline {
         address oldAirlines
     )
     external
+    requireIsOperational
     requireIsCallerAuthorized
     returns (bool success, uint256 votes)
     {
@@ -161,7 +167,10 @@ contract FlightSuretyData is Airline {
         return (false, 0);
     }
 
-    function activateAirline(address account, bool mode) returns (bool success){
+    function activateAirline(address account, bool mode)
+    requireIsOperational
+    requireIsCallerAuthorized
+    returns (bool success){
         require(isAirline(account), "Error 3");
         setAirlaneStatus(account, mode);
         return (true);
@@ -174,7 +183,8 @@ contract FlightSuretyData is Airline {
         uint256 _timestamp
     )
     external
-
+    requireIsOperational
+    requireIsCallerAuthorized
     {
         require(isAirline(_airline), "Error");
         require(isActive(_airline), "Error");
@@ -201,6 +211,8 @@ contract FlightSuretyData is Airline {
         uint256 timestamp,
         uint8 statusCode
     )
+    requireIsOperational
+    requireIsCallerAuthorized
     external
     {
         bytes32 _key = getFlightKey(airline, flight/*, timestamp*/);
@@ -208,6 +220,9 @@ contract FlightSuretyData is Airline {
         flights[_key].updatedTimestamp = timestamp;
         flights[_key].airline = airline;
         address[] insured = flights[_key].insured;
+        /**
+        * Credits payouts to insurees
+        */
         for (uint i=0; i<insured.length; i++) {
             passengers[insured[i]].balance = passengers[insured[i]].insuranceValue[_key].mul(3).div(2);
         }
@@ -216,7 +231,8 @@ contract FlightSuretyData is Airline {
     //
     function fetchAirlineStatus(
         address airline
-    ) requireIsOperational public view returns
+    )
+    public view returns
     (
         bool isRegistered
     )
@@ -259,9 +275,8 @@ contract FlightSuretyData is Airline {
         address _account,
         address _airline,
         string flight
-    /*uint256 timestamp*/) public view returns(
+    ) public view returns(
         bool isRegistered,
-        //address wallet,
         uint insuranceValue,
         uint balance
     )
@@ -270,14 +285,12 @@ contract FlightSuretyData is Airline {
         bytes32 _key = getFlightKey(_airline, flight);
 
         isRegistered = passengers[_account].isRegistered;
-        //wallet = passengers[_account].wallet;
         insuranceValue = passengers[_account].insuranceValue[_key];
         balance =  passengers[_account].balance;
 
         return
         (
             isRegistered,
-            //wallet,
             insuranceValue,
             balance
         );
@@ -295,6 +308,8 @@ contract FlightSuretyData is Airline {
         address airline,
         string flight
     )
+    requireIsOperational
+    requireIsCallerAuthorized
     external
     //payable
     {
@@ -311,90 +326,45 @@ contract FlightSuretyData is Airline {
         flights[_key].insured.push(account);
     }
 
-    /**
-     *  @dev Credits payouts to insurees
-    */
-    function creditInsurees
-    (
-    )
-    external
-    pure
-    {
-    }
-
-
-    /**
-     *  @dev Transfers eligible payout funds to insuree
-     *
-    */
-    function pay
-    (
-    )
-    external
-    pure
-    {
-    }
-
-    /**
-     * @dev Initial funding for the insurance. Unless there are too many delayed flights
-     *      resulting in insurance payouts, the contract should be self-sustaining
-     *
-     */
-    function fund
-    (
-    )
-    public
-    payable
-    {
-    }
-
     function getFlightKey
     (
         address airline,
         string memory flight
         //uint256 timestamp
     )
-    pure
+    view
     internal
+    requireIsOperational
     returns (bytes32)
     {
         return keccak256(abi.encodePacked(airline, flight/*, timestamp*/));
     }
 
-    /**
-    * @dev Fallback function for funding smart contract.
-    *
-    */
-    function()
-    external
-    payable
-    {
-        fund();
-    }
-
-
-    modifier requireIsCallerAuthorized()
-    {
-        require(msg.sender == contractApp, "Caller is not authorized");
-        _;
-    }
-
     function authorizeCaller(address appAddress)
     external
     requireContractOwner
+    requireIsOperational
     {
         contractApp = appAddress;
     }
 
     function getBalance(
         address passenger
-    ) external returns(uint){
+    )
+    external
+    requireIsOperational
+    requireIsCallerAuthorized
+    returns(uint){
         return passengers[passenger].balance;
     }
 
     function withdrawFunds(
         address passenger
-    ) external returns (uint){
+    )
+    external
+    requireIsOperational
+    requireIsCallerAuthorized
+    returns (uint){
         uint balance = passengers[passenger].balance;
         passengers[passenger].balance = 0;
         return balance;

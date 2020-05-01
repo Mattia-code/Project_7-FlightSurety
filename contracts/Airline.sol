@@ -26,6 +26,11 @@ contract Airline {
         _;
     }
 
+    modifier onlyActiveAirline(){
+        require(isActive(msg.sender), "Only Active Airlines");
+        _;
+    }
+
     // Define a function 'isAirline' to check this role
     function isAirline(address account) public view returns (bool) {
         return airlines.has(account);

@@ -35,9 +35,9 @@ export default class Contract {
 
 
         console.log("The appAddress is: "+config.appAddress);
-        //this.flightSuretyApp = new this.web3.eth.Contract(FlightSuretyApp.abi, config.appAddress);
-        //this.initialize(callback);
-        //this.account = null;
+        /*this.flightSuretyApp = new this.web3.eth.Contract(FlightSuretyApp.abi, config.appAddress);
+        this.initialize(callback);
+        this.account = null;*/
         this.airlines = {};
         this.passengers = {};
         this.airlineNames = ['AirAB1','AirAB2','AirAB3','AirAB4','AirAB5'];
@@ -65,7 +65,7 @@ export default class Contract {
 
     }
 
-    getMetaskAccountID() {
+    /*getMetaskAccountID() {
         this.web3.eth.getAccounts(function (err, res) {
             if (err) {
                 console.log('Error:', err);
@@ -74,7 +74,7 @@ export default class Contract {
             console.log('getMetaskID[0]:', res[0]);
             this.account = res[0];
         })
-    }
+    }*/
 
     isOperational(callback) {
        let self = this;
@@ -83,13 +83,13 @@ export default class Contract {
             .call({ from: self.account}, callback);
     }
 
-    fetchFlightStatus(flight, callback) {
+    fetchFlightStatus(airline, flight, callback) {
         let self = this;
         let payload = {
-            airline: self.airlines[0],
+            airline: airline,
             flight: flight,
             timestamp: Math.floor(Date.now() / 1000)
-        } 
+        }
         self.flightSuretyApp.methods
             .fetchFlightStatus(payload.airline, payload.flight, payload.timestamp)
             .send({ from: self.account}, (error, result) => {
@@ -99,12 +99,10 @@ export default class Contract {
 
     fundContract(value, callback){
         let self = this;
-        let eth = self.web3.utils.toWei(value, "ether");
-        self.getMetaskAccountID()
+        let ether = self.web3.utils.toWei(value, "ether");
         self.flightSuretyApp.methods
             .fundContract()
-            .send({ from: self.account, value: eth, gasPrice: 0}, (error, result) => {
-                console.log(error, result);
+            .send({ from: self.account, value: ether, gasPrice: 0}, (error, result) => {
                 callback(error, result);
             });
     }
@@ -112,49 +110,45 @@ export default class Contract {
     registerAirline(airline, callback){
         let self = this;
         const AIRLINE_REGISTRATION_FEE = self.web3.utils.toWei("1", "ether");
-        console.log("airline", airline)
         self.flightSuretyApp.methods.registerAirline(airline)
             .send({ from: self.account, value: AIRLINE_REGISTRATION_FEE, gasPrice: 0}, (error, result) => {
-                console.log(error, result)
                 callback(error, result);
             })
     }
 
     registerFlight( airline, flight, timestamp, callback){
         let self = this;
-        console.log("airline", airline);
-        console.log("flight", flight);
-        console.log("timestamp", timestamp);
-        console.log("self.airlines[0]", self.airlines[0])
+        console.log("airline", airline, "flight", flight, "timestamp", timestamp);
         self.flightSuretyApp.methods.registerFlight(airline, flight, timestamp)
             .send({ from: self.account }, (error, result) => {
-                console.log(error, result)
                 callback(error, result);
             })
     }
 
     activateAirline(value, callback){
         let self = this;
-        let eth = self.web3.utils.toWei(value, "ether");
+        let ether = self.web3.utils.toWei(value, "ether");
         self.flightSuretyApp.methods.activateAirline(true)
-            .send({ from: self.account, value: eth, gasPrice: 0}, (error, result) => {
-                console.log(error, result)
+            .send({ from: self.account, value: ether, gasPrice: 0}, (error, result) => {
                 callback(error, result)
             })
     }
 
     buy(airline, flight, value, callback){
         let self = this;
-        let eth = self.web3.utils.toWei(value, "ether");
-        self.flightSuretyApp.methods.activateAirline(true)
-            .send({ from: self.account, value: eth, gasPrice: 0}, (error, result) => {
-                console.log(error, result)
+        let ether = self.web3.utils.toWei(value, "ether");
+        self.flightSuretyApp.methods.buy(airline, flight)
+            .send({ from: self.account, value: ether, gasPrice: 0}, (error, result) => {
                 callback(error, result)
             })
     }
 
-    creditInsurees(){
-
+    withdrawFunds(){
+        self.flightSuretyApp.methods
+            .withdrawFunds()
+            .send({ from: self.account}, (error, result) => {
+                callback(error, result);
+            });
     }
 
     fetchFlightBuffer(airline, flight, callback){
@@ -178,6 +172,12 @@ export default class Contract {
                 console.log(error, result)
                 callback(error, result)
             })
+
+    }getBalance(){
+        let self = this;
+        self.flightSuretyApp.methods
+            .getBalance()
+            .call({ from: self.account}, callback);
     }
 
 }

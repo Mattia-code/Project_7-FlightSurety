@@ -207,6 +207,7 @@ contract FlightSuretyApp {
         flightSuretyData.processFlightStatus(airline, flight, timestamp, statusCode);
     }
 
+    event InsuranceBought(bool result);
     //
     function buy
     (
@@ -220,6 +221,7 @@ contract FlightSuretyApp {
     {
         require(msg.value>0, "Error");
         flightSuretyData.buy(msg.sender, msg.value, airline, flight);
+        emit InsuranceBought(true);
     }
 
     /**
